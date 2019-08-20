@@ -4,81 +4,35 @@ import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 import android.arch.lifecycle.ViewModel;
 
-import com.baramit.com.androidtest.repositories.PlaceRepositories;
+import com.baramit.com.androidtest.repositories.IntegerRepository;
 
 import java.util.List;
 
 public class MainActivityViewModel extends ViewModel {
 
-    private MutableLiveData<List<Place>> mPlaces;
-    private MutableLiveData<Place> mPlace;
-    private PlaceRepositories mRepo;
+    private MutableLiveData<List<Integer>> mNumbers;
+    private MutableLiveData<Integer> mNumber;
+    private IntegerRepository mRepo;
 
     public void init() {
-        if (mPlaces == null) {
-            mRepo = PlaceRepositories.getInstance();
-            mPlaces = mRepo.getPlaces();
-            mPlace = mRepo.getPlace();
+        if (mRepo == null) {
+            mRepo = IntegerRepository.getInstance();
+            mNumbers = mRepo.getNumbers();
+            mNumber = mRepo.getNumber();
         }
     }
 
-    public LiveData<List<Place>> getMyPlaces() {
-        return mPlaces;
+    public LiveData<List<Integer>> getMyNumbers() {
+        return mNumbers;
     }
 
-    public LiveData<Place> getPlace() {
-        return mPlace;
+    public LiveData<Integer> getMySingleNumber() {
+        return mNumber;
     }
 
-    public void randomPlaces() {
-        mRepo.getClient().mutableLiveData3Call(mRepo.calls().getRandomPlaces());
+    public void makeNumbersRequest() {
+        mRepo.getClient().mutableLiveData1Call(mRepo.calls().getNumbers());
     }
 
-    public void updatePlace(Place place) {
-        place.setReq_num(39);
-        mRepo.getClient().mutableLiveData3Call(mRepo.calls().updatePlace(place));
-    }
-
-    public void addPlace(Place place) {
-        place.setReq_num(40);
-        mRepo.calls().addPlace(place);
-    }
-
-    public void getPlaceObject(int placeId) {
-        mRepo.getClient().mutableLiveData1Call(mRepo.calls().getPlace(placeId));
-    }
-
-    public Place getPlaceAgain(int placeId) {
-        if (mPlaces.getValue() != null) {
-            for (Place place : mPlaces.getValue()) {
-                if (place.getId() == placeId) {
-                    return place;
-                }
-            }
-        }
-
-        //same for loop for local dataBase;
-        mRepo.getClient().mutableLiveData1Call(mRepo.calls().getPlace(placeId));
-
-        return mPlace.getValue();
-    }
-
-    public void clearPlaces() {
-        mPlaces.getValue().clear();
-    }
-
-    public boolean validatePlace(Place place) {
-
-        boolean isValid = true;
-
-        if (place.getName().equals("בר"))
-            isValid = false;
-
-        return isValid;
-    }
-
-    public void handleOnPlaceClick(Place place) {
-        mPlace.postValue(place);
-    }
 
 }

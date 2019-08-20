@@ -1,4 +1,4 @@
-package com.baramit.com.androidtest.Network;
+package com.baramit.com.androidtest.network;
 
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
@@ -32,7 +32,7 @@ public class ApiClient<T> {
     private static ApiClient mInstance;
     private static Retrofit ApiClient;
     private static ScheduledExecutorService mNetworkIO;
-    private static String BASE_URL = "https://api-mytrip.tk/api/";
+    private static String BASE_URL = "https://pastebin.com/";
 
     private MutableLiveData mutableLiveData1;
     private MutableLiveData mutableLiveData2;
@@ -65,7 +65,6 @@ public class ApiClient<T> {
     }
 
     private static void initClient() {
-
         ApiClient = new Retrofit.Builder()
                 .addConverterFactory(createGsonConverter(mInstance.customDeserializer))
                 .baseUrl(BASE_URL)
@@ -75,16 +74,14 @@ public class ApiClient<T> {
     }
 
     private static void initDeserializer() {
-        if (mInstance.interfaceClass == PlacesApi.class)
-            mInstance.customDeserializer = new CustomDeserializer();
-        else if (mInstance.interfaceClass == TripsApi.class)
+        //init SPECIFIC custom deserializers with the need to set them manually
+        if (mInstance.interfaceClass == ApiCalls.class)
             mInstance.customDeserializer = new CustomDeserializer();
 
     }
 
     private static Converter.Factory createGsonConverter(CustomDeserializer ApiDeserializer) {
-
-        if (ApiDeserializer == null)
+        if (ApiDeserializer == null) //if no custom deserializer provided nor found, init default GsonConverterFactory.
             return GsonConverterFactory.create();
 
         GsonBuilder gsonBuilder = new GsonBuilder();
@@ -124,25 +121,6 @@ public class ApiClient<T> {
 
     public <E extends Object> LiveData<E> getLiveData3() {
         return mutableLiveData3;
-    }
-
-    private <E extends Object> void handleResponse(Response<E> response, MutableLiveData mutableLiveData) {
-        if (response.isSuccessful()) {
-            E mObject = response.body();
-
-            if (mObject instanceof JsonObject) {
-                Log.e("My Json Response:", mObject.toString());
-            } else if (mObject instanceof List) {
-                if (mutableLiveData.getValue() == null)
-                    mutableLiveData.postValue(mObject);
-                else {
-                    ((List) mutableLiveData.getValue()).addAll((List) mObject);
-                    mutableLiveData.postValue(mutableLiveData.getValue());
-                }
-            } else {
-                mutableLiveData.postValue(mObject);
-            }
-        }
     }
 
     public <E extends Object> void mutableLiveData1Call(final Call<E> request) {
@@ -216,6 +194,25 @@ public class ApiClient<T> {
         }, DELAY_TIME, TimeUnit.MILLISECONDS);
     }
 
+    private <E extends Object> void handleResponse(Response<E> response, MutableLiveData mutableLiveData) {
+        if (response.isSuccessful()) {
+            E mObject = response.body();
+
+            if (mObject instanceof JsonObject) {
+                Log.e("My Json Response:", mObject.toString());
+            } else if (mObject instanceof List) {
+                if (mutableLiveData.getValue() == null)
+                    mutableLiveData.postValue(mObject);
+                else {
+                    ((List) mutableLiveData.getValue()).addAll((List) mObject);
+                    mutableLiveData.postValue(mutableLiveData.getValue());
+                }
+            } else {
+                mutableLiveData.postValue(mObject);
+            }
+        }
+    }
+
     public <E extends Object> Callback<E> asyncCallbacks(final Class<E> type) {
         return new Callback<E>() {
             @Override
@@ -223,7 +220,7 @@ public class ApiClient<T> {
                 if (response.isSuccessful()) {
                     mInstance.asyncResponse = response.body();
                 } else {
-                    Log.e("Response failure", response.raw().toString());
+                    Log.d("Response failure", response.raw().toString());
                 }
             }
 
